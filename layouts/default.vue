@@ -1,4 +1,17 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useNav } from "@/composables/useNav";
+import { useRoute } from "vue-router";
+import { computed } from "vue";
+
+const route = useRoute();
+const { navMain } = useNav();
+
+const breadcrumbTitle = computed(() => {
+  const match = navMain.find((item) => item.url === route.path);
+  return match?.title || "Page";
+});
+</script>
+
 <template>
   <SidebarProvider>
     <AppSidebar />
@@ -8,17 +21,12 @@
       >
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
-          <Separator orientation="vertical" class="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Building Your Application
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator class="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                <BreadcrumbPage
+                  ><h3>{{ breadcrumbTitle }}</h3></BreadcrumbPage
+                >
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

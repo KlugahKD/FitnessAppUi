@@ -6,6 +6,7 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { Check, Circle, Dot } from "lucide-vue-next";
 import { h, ref } from "vue";
 import * as z from "zod";
+import { signup } from "@/features/auth/api/auth";
 
 const router = useRouter();
 const formSchema = [
@@ -58,19 +59,22 @@ const steps = [
   },
 ];
 
-function onSubmit(values: any) {
-  //   toast({
-  //     title: "You submitted the following values:",
-  //     description: h(
-  //       "pre",
-  //       { class: "mt-2 w-[340px] rounded-md bg-slate-950 p-4" },
-  //       h("code", { class: "text-white" }, JSON.stringify(values, null, 2))
-  //     ),
-  //   });
+const onSubmit = async (values: any) => {
   console.log(values);
+  const payload = {
+    email: "biduntawiah@gmail.com",
+    FirstName: "brandon",
+    LastName: "idun",
+    DateOfBirth: "1990-01-01",
+    FitnessGoals: "Lose weight",
+    HowOftenWorkout: "3 times a week",
+    AvatarChoice: "Avatar1",
+    password: "Password@1",
+  };
+  const result = await signup(payload);
   router.push("/dashboard");
   // router.push("/auth/sign-in");
-}
+};
 </script>
 
 <template>
