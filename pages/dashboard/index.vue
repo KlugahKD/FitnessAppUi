@@ -7,6 +7,7 @@ import {
 } from "@internationalized/date";
 import { type Ref, ref } from "vue";
 import { Progress } from "@/components/ui/progress";
+import { Dumbbell, CloudSunRain, Zap, CalendarDays } from "lucide-vue-next";
 
 const value = ref(today(getLocalTimeZone())) as Ref<DateValue>;
 const progress = ref(13);
@@ -23,8 +24,9 @@ watchEffect((cleanupFn) => {
           <CardTitle class="text-sm text-gray-500">Weather</CardTitle>
           <CardDescription class="text-2xl font-bold mt-2 text-black">
             <Skeleton v-if="status === 'pending'" class="h-8" />
-            <span v-else>{{ 0 }}°C</span>
+            <span v-else>{{ 29 }}°C</span>
           </CardDescription>
+          <CloudSunRain />
         </CardHeader>
       </Card>
 
@@ -34,8 +36,9 @@ watchEffect((cleanupFn) => {
           <CardDescription class="text-2xl font-bold mt-2 text-black">
             <Skeleton v-if="status === 'pending'" class="h-8" />
             <span v-else>
-              {{ "0" }}
+              {{ "49" }}
             </span>
+            <Dumbbell />
           </CardDescription>
         </CardHeader>
       </Card>
@@ -46,8 +49,9 @@ watchEffect((cleanupFn) => {
           <CardDescription class="text-2xl font-bold mt-2 text-black">
             <Skeleton v-if="status === 'pending'" class="h-8" />
             <span v-else>
-              {{ "0" }}
+              {{ 300 }}
             </span>
+            <Zap />
           </CardDescription>
         </CardHeader>
       </Card>
@@ -58,8 +62,9 @@ watchEffect((cleanupFn) => {
           <CardDescription class="text-2xl font-bold mt-2 text-black">
             <Skeleton v-if="status === 'pending'" class="h-8" />
             <span v-else>
-              {{ "0" }}
+              {{ 70 }}
             </span>
+            <CalendarDays />
           </CardDescription>
         </CardHeader>
       </Card>
