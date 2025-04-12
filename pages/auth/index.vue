@@ -3,56 +3,63 @@ import { useForm } from "vee-validate";
 import { loginSchema } from "@/features/auth/schemas/auth";
 import { login } from "@/features/auth/api/auth";
 import type { LoginForm } from "@/features/auth/schemas/auth";
+import { toTypedSchema } from "@vee-validate/zod";
 
 definePageMeta({
   layout: "custom",
 });
+
 const router = useRouter();
 
-// const { handleSubmit, errors, values } = useForm<LoginForm>({
-//   validationSchema: loginSchema,
-//   initialValues: {
-//     email: "",
-//     password: "",
-//   },
-// });
-
-const form = ref({
-  email: "",
-  password: "",
+const form = useForm<LoginForm>({
+  validationSchema: toTypedSchema(loginSchema),
 });
 
-const onSubmit = async (formData: any) => {
-  formData = form.value;
-  // const result = await login(formData);
+const onSubmit = form.handleSubmit(async (values: LoginForm) => {
+  // console.log("hihi, formData", formData);
+  // formData = form.value;
+  const result = await login(values);
   router.push("/dashboard");
-};
+});
 </script>
 <template>
-  <div class="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-    <div class="flex items-center justify-center py-12">
+  <main class="grid h-screen w-screen sm:grid-cols-2 [&>*]:h-full">
+    <div class="flex flex-col items-center justify-center">
       <div class="mx-auto grid w-[350px] gap-6">
-        <div class="grid gap-2 text-center">
-          <h1 class="text-3xl font-bold">Login</h1>
-          <p class="text-balance text-muted-foreground">
-            Enter your email below to login to your account
-          </p>
-        </div>
         <form class="grid gap-4" @submit.prevent="onSubmit">
-          <div>
-            <Label for="email">Email</Label>
-            <Input
-              v-model="form.email"
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-            />
-          </div>
+          <header class="mb-4">
+            <h1 class="text-3xl font-bold">Log in</h1>
+            <p class="mt-3 text-gray-600">
+              Welcome back! Please enter your details.
+            </p>
+          </header>
+          <FormField v-slot="{ componentField }" name="email">
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="johndoe@gmail.com"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-          <div>
-            <Label for="password">Password</Label>
-            <Input v-model="form.password" id="password" type="password" />
-          </div>
+          <FormField v-slot="{ componentField }" name="password">
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="password"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
           <Button type="submit" class="w-full">Login</Button>
         </form>
@@ -74,10 +81,8 @@ const onSubmit = async (formData: any) => {
       <img
         src="/authbackground.jpg"
         alt="Image"
-        width="1920"
-        height="1080"
-        class="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        class="flex flex-col items-center justify-center bg-center bg-no-repeat bg-cover"
       />
     </div>
-  </div>
+  </main>
 </template>
