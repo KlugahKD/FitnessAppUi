@@ -3,84 +3,53 @@ definePageMeta({
   layout: "custom",
 });
 import { toTypedSchema } from "@vee-validate/zod";
-import { Check, Circle, Dot } from "lucide-vue-next";
 import { h, ref } from "vue";
 import * as z from "zod";
 import { signup } from "@/features/auth/api/auth";
-
+import { useForm } from "vee-validate";
+import {
+  signupStep1,
+  signupStep2,
+  signupStep3,
+  signupSchema, // still needed for final submission
+} from "@/features/auth/schemas/auth";
+import type { SignupForm } from "@/features/auth/schemas/auth";
+import { Check, Circle, Dot } from "lucide-vue-next";
 const router = useRouter();
-const formSchema = [
-  z.object({
-    fullName: z.string(),
-    email: z.string().email(),
-    password: z.string().min(2).max(50),
-  }),
-  z
-    .object({
-      password: z.string().min(2).max(50),
-      confirmPassword: z.string(),
-    })
-    .refine(
-      (values) => {
-        return values.password === values.confirmPassword;
-      },
-      {
-        message: "Passwords must match!",
-        path: ["confirmPassword"],
-      }
-    ),
-  z.object({
-    goal: z.union([
-      z.literal("Strength"),
-      z.literal("Endurance"),
-      z.literal("Weight Loss"),
-      z.literal("Muscle Gain"),
-      z.literal("Cardio"),
-    ]),
-  }),
-];
+import { toast } from "vue-sonner";
+
+const form = useForm<SignupForm>({
+  validationSchema: toTypedSchema(signupSchema),
+});
+
+const stepSchemas = [signupStep1, signupStep2, signupStep3];
 
 const stepIndex = ref(1);
 const steps = [
   {
     step: 1,
     title: "Your details",
-    description: "Provide your name and email",
   },
   {
     step: 2,
     title: "Your Goals",
-    description: "Choose a goal",
   },
   {
     step: 3,
-    title: "Your Favorite Avatar",
-    description: "Choose an avatar",
+    title: "Your Avatar",
   },
 ];
 
 const onSubmit = async (values: any) => {
-  console.log(values);
-  const payload = {
-    email: "biduntawiah@gmail.com",
-    FirstName: "brandon",
-    LastName: "idun",
-    DateOfBirth: "1990-01-01",
-    FitnessGoals: "Lose weight",
-    HowOftenWorkout: "3 times a week",
-    AvatarChoice: "Avatar1",
-    password: "Password@1",
-  };
-  const result = await signup(payload);
-  router.push("/dashboard");
-  // router.push("/auth/sign-in");
+  console.log("submitted", values);
+  const result = await signup(values);
 };
 </script>
 
 <template>
   <div class="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
     <div
-      class="w-[400px] mx-auto my-auto flex items-center justify-center py-12 grid gap-6"
+      class="w-full mx-auto my-auto flex items-center justify-center py-12 grid gap-6"
     >
       <div class="grid gap-2 text-center">
         <h1 class="text-3xl font-bold">Sign Up</h1>
@@ -88,31 +57,28 @@ const onSubmit = async (values: any) => {
           Enter your details below to create your account
         </p>
       </div>
-      <Form
-        v-slot="{ meta, values, validate }"
-        as=""
-        keep-values
-        :validation-schema="toTypedSchema(formSchema[stepIndex - 1])"
-      >
-        <div class="grid items-center w-full gap-4">
-          <Stepper
-            v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }"
-            v-model="stepIndex"
-            class="block w-full"
-          >
-            <form
-              @submit="
-                (e) => {
-                  e.preventDefault();
-                  validate();
 
-                  if (stepIndex === steps.length && meta.valid) {
-                    onSubmit(values);
-                  }
-                }
-              "
+      <Form
+        v-slot="{ meta, values }"
+        as="form"
+        keep-values
+        :validation-schema="toTypedSchema(stepSchemas[stepIndex - 1])"
+      >
+        <form
+          @submit="
+            (e) => {
+              e.preventDefault();
+              onSubmit(values);
+            }
+          "
+        >
+          <div class="grid items-center w-full gap-4">
+            <Stepper
+              v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }"
+              v-model="stepIndex"
+              class="block w-full"
             >
-              <div class="flex w-full flex-start gap-2">
+              <div class="flex flex-start gap-2">
                 <StepperItem
                   v-for="step in steps"
                   :key="step.step"
@@ -153,23 +119,41 @@ const onSubmit = async (values: any) => {
                     >
                       {{ step.title }}
                     </StepperTitle>
-                    <StepperDescription
+                    <!-- <StepperDescription
                       :class="[state === 'active' && 'text-primary']"
                       class="sr-only text-xs text-muted-foreground transition md:not-sr-only lg:text-sm"
                     >
                       {{ step.description }}
-                    </StepperDescription>
+                    </StepperDescription> -->
                   </div>
                 </StepperItem>
               </div>
 
-              <div class="flex flex-col gap-4 mt-4">
+              <div class="w-full flex flex-col gap-4 mt-4">
                 <template v-if="stepIndex === 1">
-                  <FormField v-slot="{ componentField }" name="fullName">
+                  <FormField v-slot="{ componentField }" name="FirstName">
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input type="text" v-bind="componentField" />
+                        <Input
+                          type="text"
+                          placeholder="Jane"
+                          v-bind="componentField"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+
+                  <FormField v-slot="{ componentField }" name="LastName">
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Doe"
+                          v-bind="componentField"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -179,7 +163,24 @@ const onSubmit = async (values: any) => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email " v-bind="componentField" />
+                        <Input
+                          type="email"
+                          placeholder="janedoe@gmail.com"
+                          v-bind="componentField"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                  <FormField v-slot="{ componentField }" name="dob">
+                    <FormItem>
+                      <FormLabel>Date Of Birth</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="DD/MM/YYYY"
+                          v-bind="componentField"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -190,6 +191,7 @@ const onSubmit = async (values: any) => {
                       <FormControl>
                         <Input
                           type="password"
+                          placeholder="password"
                           v-bind="componentField"
                           required
                         />
@@ -200,29 +202,7 @@ const onSubmit = async (values: any) => {
                 </template>
 
                 <template v-if="stepIndex === 2">
-                  <FormField v-slot="{ componentField }" name="password">
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" v-bind="componentField" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-
-                  <FormField v-slot="{ componentField }" name="confirmPassword">
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" v-bind="componentField" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                </template>
-
-                <template v-if="stepIndex === 3">
-                  <FormField v-slot="{ componentField }" name="goal">
+                  <FormField v-slot="{ componentField }" name="FitnessGoals">
                     <FormItem>
                       <FormLabel>Goal</FormLabel>
 
@@ -251,31 +231,55 @@ const onSubmit = async (values: any) => {
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                </template>
-                <template v-if="stepIndex === 4">
-                  <FormField v-slot="{ componentField }" name="goal">
+                  <FormField v-slot="{ componentField }" name="HowOftenWorkout">
                     <FormItem>
-                      <FormLabel>Goal</FormLabel>
+                      <FormLabel>How Often Do You Workout</FormLabel>
 
                       <Select v-bind="componentField">
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a target goal" />
+                            <SelectValue placeholder="how many times a week" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="Strength"> Strength </SelectItem>
-                            <SelectItem value="Endurance">
-                              Endurance
+                            <SelectItem value="1-2 times a week">
+                              1-2 times a week
                             </SelectItem>
-                            <SelectItem value="Weight Loss">
-                              Weight Loss
+                            <SelectItem value="3-4 times a week">
+                              3-4 times a week
                             </SelectItem>
-                            <SelectItem value="Muscle Gain">
-                              Muscle Gain
+                            <SelectItem value="5-6 times a week">
+                              5-6 times a week
                             </SelectItem>
-                            <SelectItem value="Cardio"> Cardio </SelectItem>
+                            <SelectItem value="Every day">
+                              Every day
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                </template>
+
+                <template v-if="stepIndex === 3">
+                  <FormField v-slot="{ componentField }" name="AvatarChoice">
+                    <FormItem>
+                      <FormLabel>Avatar Choice</FormLabel>
+
+                      <Select v-bind="componentField">
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="choose an avatar" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="Avatar 1"> Avatar 1 </SelectItem>
+                            <SelectItem value="Avatar 2"> Avatar 2 </SelectItem>
+                            <SelectItem value="Avatar 3"> Avatar 3 </SelectItem>
+                            <SelectItem value="Avatar 4"> Avatar 4 </SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -318,9 +322,9 @@ const onSubmit = async (values: any) => {
                   </Button>
                 </div>
               </div>
-            </form>
-          </Stepper>
-        </div>
+            </Stepper>
+          </div>
+        </form>
       </Form>
     </div>
     <div class="hidden bg-muted lg:block">
