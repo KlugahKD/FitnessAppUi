@@ -9,36 +9,33 @@ export type LoginForm = z.infer<typeof loginSchema>;
 
 const stepOne = z.object({
   email: z.string().email("Invalid email"),
-  FirstName: z.string().min(2, "First name must be at least 2 characters"),
-  LastName: z.string().min(2, "Last name must be at least 2 characters"),
-  dob: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, {
-    message: "Date must be in DD/MM/YYYY format",
-  }),
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  dateOfBirth: z.string().min(10, "Date must be in YYYY-MM-DD format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const stepTwo = z.object({
-  FitnessGoals: z.union([
-    z.literal("Strength"),
-    z.literal("Endurance"),
-    z.literal("Weight Loss"),
-    z.literal("Muscle Gain"),
-    z.literal("Cardio"),
+  fitnessGoals: z.union([
+    z.literal("ImproveEndurance"),
+    z.literal("LoseWeight"),
+    z.literal("GainMuscle"),
+    z.literal("IncreaseFlexibility"),
   ]),
-  HowOftenWorkout: z.union([
+  howOftenWorkOut: z.union([
     z.literal("1-2 times a week"),
     z.literal("3-4 times a week"),
     z.literal("5-6 times a week"),
-    z.literal("Every day"),
+    z.literal("Everyday"),
   ]),
 });
 
 const stepThree = z.object({
-  AvatarChoice: z.union([
-    z.literal("Avatar 1"),
-    z.literal("Avatar 2"),
-    z.literal("Avatar 3"),
-    z.literal("Avatar 4"),
+  avatarChoice: z.union([
+    z.literal("Core"),
+    z.literal("Pulse"),
+    z.literal("Zenith"),
+    z.literal("Titan"),
   ]),
 });
 

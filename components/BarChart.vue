@@ -2,26 +2,37 @@
 import { AreaChart } from "@/components/ui/chart-area";
 import { CurveType } from "@unovis/ts";
 
-const data = [
-  { name: "Jan", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Feb", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Mar", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Apr", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "May", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Jun", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Jul", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Aug", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Sep", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Oct", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Nov", total: Math.floor(Math.random() * 2000) + 1000 },
-  { name: "Dec", total: Math.floor(Math.random() * 2000) + 1000 },
-];
+const props = defineProps({
+  data: {
+    type: Array as () => Record<string, any>[],
+    required: true,
+    default: () => [
+      { name: "Sunday", total: Math.floor(Math.random() * 2000) + 1000 },
+      { name: "Monday", total: Math.floor(Math.random() * 2000) + 1000 },
+      { name: "Tuesday", total: Math.floor(Math.random() * 2000) + 1000 },
+      { name: "Wednesday", total: Math.floor(Math.random() * 2000) + 1000 },
+      { name: "Thursday", total: Math.floor(Math.random() * 2000) + 1000 },
+      { name: "Friday", total: Math.floor(Math.random() * 2000) + 1000 },
+      { name: "Saturday", total: Math.floor(Math.random() * 2000) + 1000 },
+    ],
+  },
+});
+
+// const data = [
+//   { name: "Sunday", total: Math.floor(Math.random() * 2000) + 1000 },
+//   { name: "Monday", total: Math.floor(Math.random() * 2000) + 1000 },
+//   { name: "Tuesday", total: Math.floor(Math.random() * 2000) + 1000 },
+//   { name: "Wednesday", total: Math.floor(Math.random() * 2000) + 1000 },
+//   { name: "Thursday", total: Math.floor(Math.random() * 2000) + 1000 },
+//   { name: "Friday", total: Math.floor(Math.random() * 2000) + 1000 },
+//   { name: "Saturday", total: Math.floor(Math.random() * 2000) + 1000 },
+// ];
 </script>
 
 <template>
   <AreaChart
     index="name"
-    :data="data"
+    :data="props.data"
     :categories="['total']"
     :show-grid-line="false"
     :show-legend="false"

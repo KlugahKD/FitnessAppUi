@@ -3,8 +3,8 @@ import { useForm } from "vee-validate";
 import { loginSchema } from "@/features/auth/schemas/auth";
 import { login } from "@/features/auth/api/auth";
 import type { LoginForm } from "@/features/auth/schemas/auth";
+import { setData } from "nuxt-storage/local-storage";
 import { toTypedSchema } from "@vee-validate/zod";
-
 definePageMeta({
   layout: "custom",
 });
@@ -16,14 +16,13 @@ const form = useForm<LoginForm>({
 });
 
 const onSubmit = form.handleSubmit(async (values: LoginForm) => {
-  // console.log("hihi, formData", formData);
-  // formData = form.value;
   const result = await login(values);
+  setData("user", result, 60 * 60 * 24 * 7);
   router.push("/dashboard");
 });
 </script>
 <template>
-  <main class="grid h-screen w-screen sm:grid-cols-2 [&>*]:h-full">
+  <main class="grid min-h-svh lg:grid-cols-2">
     <div class="flex flex-col items-center justify-center">
       <div class="mx-auto grid w-[350px] gap-6">
         <form class="grid gap-4" @submit.prevent="onSubmit">
@@ -77,11 +76,11 @@ const onSubmit = form.handleSubmit(async (values: LoginForm) => {
         </div>
       </div>
     </div>
-    <div class="hidden bg-muted lg:block">
+    <div class="relative hidden bg-muted lg:block">
       <img
         src="/authbackground.jpg"
         alt="Image"
-        class="flex flex-col items-center justify-center bg-center bg-no-repeat bg-cover"
+        class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
       />
     </div>
   </main>
