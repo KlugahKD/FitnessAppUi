@@ -17,6 +17,7 @@ import type { SignupForm } from "@/features/auth/schemas/auth";
 import { Check, Circle, Dot } from "lucide-vue-next";
 const router = useRouter();
 import { toast } from "vue-sonner";
+import { getData, setData } from "nuxt-storage/local-storage";
 
 const form = useForm<SignupForm>({
   validationSchema: toTypedSchema(signupSchema),
@@ -43,6 +44,15 @@ const steps = [
 const onSubmit = async (values: any) => {
   console.log("submitted", values);
   const result = await signup(values);
+  console.log("result", result);
+  if (result) {
+    setData("user", result);
+    toast.success("Account created successfully");
+    router.push("/auth");
+  } else {
+    toast.error("Error creating account");
+    router.replace("/auth/login");
+  }
 };
 </script>
 
@@ -131,7 +141,7 @@ const onSubmit = async (values: any) => {
 
               <div class="w-full flex flex-col gap-4 mt-4">
                 <template v-if="stepIndex === 1">
-                  <FormField v-slot="{ componentField }" name="FirstName">
+                  <FormField v-slot="{ componentField }" name="firstName">
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
@@ -145,7 +155,7 @@ const onSubmit = async (values: any) => {
                     </FormItem>
                   </FormField>
 
-                  <FormField v-slot="{ componentField }" name="LastName">
+                  <FormField v-slot="{ componentField }" name="lastName">
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
@@ -172,7 +182,7 @@ const onSubmit = async (values: any) => {
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                  <FormField v-slot="{ componentField }" name="dob">
+                  <FormField v-slot="{ componentField }" name="dateOfBirth">
                     <FormItem>
                       <FormLabel>Date Of Birth</FormLabel>
                       <FormControl>
@@ -202,7 +212,7 @@ const onSubmit = async (values: any) => {
                 </template>
 
                 <template v-if="stepIndex === 2">
-                  <FormField v-slot="{ componentField }" name="FitnessGoals">
+                  <FormField v-slot="{ componentField }" name="fitnessGoals">
                     <FormItem>
                       <FormLabel>Goal</FormLabel>
 
@@ -214,24 +224,25 @@ const onSubmit = async (values: any) => {
                         </FormControl>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="Strength"> Strength </SelectItem>
-                            <SelectItem value="Endurance">
-                              Endurance
+                            <SelectItem value="ImproveEndurance">
+                              Improve Endurance
                             </SelectItem>
-                            <SelectItem value="Weight Loss">
-                              Weight Loss
+                            <SelectItem value="LoseWeight">
+                              Lose Weight
                             </SelectItem>
-                            <SelectItem value="Muscle Gain">
-                              Muscle Gain
+                            <SelectItem value="GainMuscle">
+                              Gain Muscle
                             </SelectItem>
-                            <SelectItem value="Cardio"> Cardio </SelectItem>
+                            <SelectItem value="IncreaseFlexibility">
+                              Increase Flexibility
+                            </SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                  <FormField v-slot="{ componentField }" name="HowOftenWorkout">
+                  <FormField v-slot="{ componentField }" name="howOftenWorkOut">
                     <FormItem>
                       <FormLabel>How Often Do You Workout</FormLabel>
 
@@ -252,9 +263,7 @@ const onSubmit = async (values: any) => {
                             <SelectItem value="5-6 times a week">
                               5-6 times a week
                             </SelectItem>
-                            <SelectItem value="Every day">
-                              Every day
-                            </SelectItem>
+                            <SelectItem value="Everyday"> Everyday </SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -264,7 +273,7 @@ const onSubmit = async (values: any) => {
                 </template>
 
                 <template v-if="stepIndex === 3">
-                  <FormField v-slot="{ componentField }" name="AvatarChoice">
+                  <FormField v-slot="{ componentField }" name="avatarChoice">
                     <FormItem>
                       <FormLabel>Avatar Choice</FormLabel>
 
@@ -276,10 +285,10 @@ const onSubmit = async (values: any) => {
                         </FormControl>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="Avatar 1"> Avatar 1 </SelectItem>
-                            <SelectItem value="Avatar 2"> Avatar 2 </SelectItem>
-                            <SelectItem value="Avatar 3"> Avatar 3 </SelectItem>
-                            <SelectItem value="Avatar 4"> Avatar 4 </SelectItem>
+                            <SelectItem value="Core">Core</SelectItem>
+                            <SelectItem value="Pulse">Pulse</SelectItem>
+                            <SelectItem value="Zenith">Zenith</SelectItem>
+                            <SelectItem value="Titan">Titan</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
