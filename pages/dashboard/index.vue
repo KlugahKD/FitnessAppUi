@@ -19,7 +19,7 @@ const progress = ref(1);
 const data = ref([]);
 
 watchEffect((cleanupFn) => {
-  const timer = setTimeout(() => (progress.value = 20), 500);
+  const timer = setTimeout(() => progress.value, 500);
   cleanupFn(() => clearTimeout(timer));
 });
 
@@ -32,17 +32,17 @@ onMounted(async () => {
     if (!user || !user?.data?.userId) {
       clearInterval(interval);
       console.log("⚠️ No user found, redirecting to auth...");
-      router.push("/auth"); // adjust this path if your auth route is different
+      router.push("/auth");
       return;
     }
 
     clearInterval(interval);
 
     const userId = user.data.userId;
-    console.log("✅ userId", userId);
+    console.log("userId", userId);
 
     const res = await dashboard(userId);
-    console.log("✅ dashboard response", res);
+    console.log("dashboard response", res);
 
     if (res !== null) {
       status.value = "complete";
@@ -114,8 +114,8 @@ onMounted(async () => {
             class="flex flex-col text-2xl mt-4 font-bold text-black"
           >
             <Skeleton v-if="status === 'pending'" class="h-48" />
-            <div v-else>
-              <Avatar class="">
+            <div class="space-y-12" v-else>
+              <Avatar class="mx-auto">
                 <AvatarImage
                   src="https://github.com/unovue.png"
                   alt="@unovue"

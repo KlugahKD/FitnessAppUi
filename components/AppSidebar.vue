@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import type { FunctionalComponent } from "vue";
 import { useNav } from "@/composables/useNav";
-
+import { getData } from "nuxt-storage/local-storage";
 interface SidebarProps {
   someProp?: string;
 }
 
+const user = getData("user");
 const props = defineProps<SidebarProps>();
+const data = {
+  user: {
+    name: user?.data?.firstName,
+    email: user?.data?.email,
+    avatar: user?.data?.firstName[0] + user?.data?.lastName[0],
+  },
+};
 
-const { data, navMain, versions, icons } = useNav();
+const { navMain, versions, icons } = useNav();
 </script>
 
 <template>
