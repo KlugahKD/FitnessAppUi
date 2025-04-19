@@ -17,7 +17,7 @@
             <CardHeader>
               <CardTitle class="px-3">{{ item.title }}</CardTitle>
               <CardDescription class="text-sm text-gray-500 px-3">
-                {{ item.description }}
+                {{ item.content }}
               </CardDescription>
               <Button class="mt-8 rounded-xl w-3xs">read more</Button>
             </CardHeader>
@@ -28,7 +28,7 @@
             class="shadow-none border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
           >
             <img
-              :src="item.image"
+              :src="'/' + item.img + '.jpg'"
               alt="Fitness tip"
               class="w-full h-full object-cover rounded-xl"
             />
@@ -111,43 +111,13 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { health } from "~/features/health/api/health";
+import { getData } from "nuxt-storage/local-storage";
 
 const status = ref("pending");
-
-onMounted(async () => {
-  try {
-    const { data: healthRes, error: healthError } = await useFetch(
-      "health/personlised"
-    );
-
-    if (!healthError.value && healthRes.value?.length) {
-      healthData.value = healthRes.value;
-    }
-
-    // Optional simulated delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    status.value = "complete";
-  } catch (e) {
-    console.error("Unexpected error:", e);
-    status.value = "complete"; // Still allow UI to render fallback
-  }
-});
-
-// Static fallback article data (can replace with fetch logic if needed)
-const healthData = ref([
-  {
-    title: "Improve your Sleep",
-    description: "Aim at sleeping 7-8 hours a day to improve your health.",
-    image: "/health1.jpg",
-  },
-  {
-    title: "Stay Hydrated",
-    description: "Drink enough water daily to maintain your energy levels.",
-    image: "/health2.jpg",
-  },
-]);
-
+const router = useRouter();
+const healthData = ref([]);
 const articleData = ref([
   {
     title: "Better Sleep Habits",
@@ -167,4 +137,30 @@ const articleData = ref([
       "https://www.health.harvard.edu/blog/the-benefits-of-whole-foods-2020030918967",
   },
 ]);
+
+onMounted(async () => {
+  const interval = setInterval(async () => {
+    const user = getData("user");
+
+    if (!user || !user.data?.userId) {
+      console.warn("User not found in localStorage");
+      clearInterval(interval);
+      status.value = "complete";
+      return;
+    }
+
+    clearInterval(interval);
+
+    try {
+      const res = await health(user.data.userId);
+      console.log("Health data fetched:", res.value?.data);
+      healthData.value = res.value?.data || [];
+    } catch (error) {
+      console.error("Failed to fetch health data:", error);
+      healthData.value = [];
+    } finally {
+      status.value = "complete";
+    }
+  }, 200);
+});
 </script>

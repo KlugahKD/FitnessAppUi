@@ -46,7 +46,6 @@ const { isMobile } = useSidebar();
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <Avatar class="h-8 w-8 rounded-lg">
-              <AvatarImage :src="user.avatar" :alt="user.name" />
               <AvatarFallback class="rounded-xl">
                 {{ user.avatar }}
               </AvatarFallback>

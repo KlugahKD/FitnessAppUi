@@ -1,4 +1,3 @@
-import { NuxtLayout } from './.nuxt/components';
 <template>
   <div>
     <NuxtLayout>

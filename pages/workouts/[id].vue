@@ -1,49 +1,177 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { workout, step } from "~/features/workouts/api/workouts";
+import { getData } from "nuxt-storage/local-storage";
+import { useRoute } from "vue-router";
+
+const status = ref("pending");
+const workoutTimers = ref({});
+const steps = ref([]);
+const data = ref(null);
+
+onMounted(async () => {
+  const user = getData("user");
+  const { id } = useRoute().params;
+  const res = await workout(user.data.userId, id);
+  data.value = res.value.data;
+  console.log("workout response", res.value.data);
+  if (res !== null) {
+    steps.value = res.value.data.steps.map((step) => ({
+      ...step,
+      title: step.description,
+      time: step.durationMinutes,
+    }));
+
+    // Initialize timers using backend state
+    for (const step of res.value.data.steps) {
+      workoutTimers.value[step.id] = {
+        countdown: step.durationMinutes * 60,
+        totalTime: step.durationMinutes * 60,
+        progress: step.isCompleted ? 100 : 0,
+        isActive: false,
+        isCompleted: step.isCompleted,
+      };
+    }
+
+    status.value = "complete";
+  }
+});
+
+const formatTime = (val) => {
+  const min = String(Math.floor(val / 60)).padStart(2, "0");
+  const sec = String(val % 60).padStart(2, "0");
+  return `${min}:${sec}`;
+};
+
+const startWorkout = (id, durationMinutes) => {
+  // Prevent starting if any other step is already active
+  const isAnyStepActive = Object.entries(workoutTimers.value).some(
+    ([key, val]) => val.isActive
+  );
+
+  if (
+    isAnyStepActive || // another step is running
+    workoutTimers.value[id]?.isActive || // this step is running
+    workoutTimers.value[id]?.isCompleted // this step is done
+  ) {
+    return;
+  }
+
+  const totalTime = durationMinutes * 60;
+
+  workoutTimers.value[id] = {
+    countdown: totalTime,
+    totalTime,
+    progress: 0,
+    isActive: true,
+    isCompleted: false,
+  };
+
+  const timer = setInterval(async () => {
+    const data = workoutTimers.value[id];
+    if (!data) return;
+
+    if (data.countdown > 0) {
+      data.countdown -= 1;
+      data.progress =
+        ((data.totalTime - data.countdown) / data.totalTime) * 100;
+    } else {
+      clearInterval(timer);
+      data.countdown = 0;
+      data.progress = 100;
+      data.isActive = false;
+      data.isCompleted = true;
+      await callDummyEndpoint(id);
+    }
+  }, 1000);
+};
+
+const isAnyStepActive = computed(() =>
+  Object.values(workoutTimers.value).some((step) => step.isActive)
+);
+
+const callDummyEndpoint = async (id) => {
+  const user = getData("user");
+  const res = await step(user.data.userId, id);
+  console.log("Dummy API call made for step", id);
+};
+</script>
+
 <template>
   <div class="p-4">
     <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <!-- Health Advice Section -->
       <div>
         <h1 class="text-xl text-gray-500 p-5">Start A Workout</h1>
+        <div>
+          <h2 class="text-lg text-gray-500 px-5">
+            {{ data?.name }}
+          </h2>
+        </div>
         <div
           v-if="status === 'complete'"
-          v-for="(item, index) in healthData"
-          :key="'health-' + index"
+          v-for="(item, index) in steps"
+          :key="'step-' + item.id"
           class="space-y-10"
         >
           <div class="w-full my-10 mx-auto">
             <div class="flex flex-row justify-between items-center">
               <span class="my-6 text-sm text-gray-500"
-                >{{ index + 1 }} of {{ healthData.length }}</span
+                >{{ index + 1 }} of {{ steps.length }}</span
               >
-              <span class="text-sm text-gray-500">{{ 30 }}%</span>
+              <span class="text-sm text-gray-500">
+                {{ Math.round(workoutTimers[item.id]?.progress || 0) }}%
+              </span>
             </div>
-            <Progress />
+            <Progress :model-value="workoutTimers[item.id]?.progress || 0" />
           </div>
+
           <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <Card class="shadow-none h-40 mb-4 border-0 rounded-xl col-span-2">
               <CardHeader class="p-0">
-                <CardTitle class="">{{ item.title }}</CardTitle>
+                <CardTitle>{{ item.title }}</CardTitle>
                 <CardDescription class="text-sm text-gray-500">
-                  {{ item.level }} * {{ item.time }}
+                  {{ item.time }} minutes
                 </CardDescription>
-                <Button @click="onSubmit(item.id)" class="mt-8 rounded-xl w-3xs"
-                  >Start Workout</Button
+
+                <Button
+                  class="mt-8 rounded-xl w-3xs"
+                  @click="startWorkout(item.id, item.time)"
+                  :disabled="
+                    workoutTimers[item.id]?.isActive ||
+                    (isAnyStepActive && !workoutTimers[item.id]?.isActive)
+                  "
                 >
+                  {{
+                    workoutTimers[item.id]?.isCompleted
+                      ? "Completed Workout"
+                      : workoutTimers[item.id]?.isActive
+                      ? "In Progress..."
+                      : "Start Workout"
+                  }}
+                </Button>
               </CardHeader>
             </Card>
 
             <Card
-              class="shadow-none h-40 border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
+              class="shadow-none h-40 border-0 rounded-xl mb-4 bg-muted/50 flex items-center justify-center"
             >
-              <img
-                :src="item.image"
-                alt="Fitness tip"
-                class="w-full h-full object-cover rounded-xl"
-              />
+              <div class="text-center w-full">
+                <p class="text-4xl font-bold text-gray-700">
+                  {{
+                    workoutTimers[item.id]?.isCompleted
+                      ? "✔️ Done"
+                      : workoutTimers[item.id]?.countdown > 0
+                      ? formatTime(workoutTimers[item.id]?.countdown)
+                      : "00:00"
+                  }}
+                </p>
+                <p class="text-sm text-gray-500 mt-2">Timer</p>
+              </div>
             </Card>
           </div>
         </div>
 
+        <!-- Skeletons -->
         <div v-else v-for="n in 3" :key="'skeleton-health-' + n">
           <div>
             <div class="flex flex-row justify-between items-center">
@@ -61,7 +189,6 @@
                 <Skeleton class="h-10 w-32 mt-6 rounded-xl" />
               </CardHeader>
             </Card>
-
             <Card
               class="shadow-none border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
             >
@@ -73,50 +200,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from "vue";
-import { workout } from "~/features/workouts/api/workouts";
-import { getData } from "nuxt-storage/local-storage";
-
-const status = ref("pending");
-const router = useRouter();
-
-onMounted(async () => {
-  const interval = setInterval(async () => {
-    status.value = "pending";
-    const user = getData("user");
-    clearInterval(interval);
-    console.log("user", user.data.userId);
-    const res = await workout(user.data.userId, router.params.id);
-    if (res !== null) {
-      status.value = "complete";
-    }
-  }, 200);
-});
-
-function onSubmit(id) {
-  router.push(`/workouts/${id}`);
-}
-
-const healthData = ref([
-  {
-    title: "Yoga for Beginners",
-    level: "amateur",
-    time: "30 minutes",
-    image: "/health2.jpg",
-  },
-  {
-    title: "Full Body Workout",
-    level: "beginner",
-    time: "10 minutes",
-    image: "/health3.jpg",
-  },
-  {
-    title: "Full Body Workout",
-    level: "amateur",
-    time: "30 minutes",
-    image: "/health3.jpg",
-  },
-]);
-</script>

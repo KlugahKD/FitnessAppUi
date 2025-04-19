@@ -26,12 +26,12 @@ export const useChatBot = (userId: string) => {
       const { data, error } = await Fetch("/Avatar/response", {
         method: "POST",
         query: { userId },
-        body: { question: text },
+        body: JSON.stringify(text),
       });
 
       const botReply = error.value
         ? "Oops! Something went wrong."
-        : (data.value as string);
+        : (data.value.data as string);
 
       messages.value.push({
         id: ++id,
