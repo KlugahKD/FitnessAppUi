@@ -34,6 +34,13 @@ const props = defineProps<{
 }>();
 
 const { isMobile } = useSidebar();
+const route = useRoute();
+
+function logout() {
+  localStorage.clear();
+  route.push("/");
+  console.log("Logging out...");
+}
 </script>
 
 <template>
@@ -67,7 +74,9 @@ const { isMobile } = useSidebar();
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar class="h-8 w-8 rounded-lg">
                 <AvatarImage :src="user.avatar" :alt="user.name" />
-                <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
+                <AvatarFallback class="rounded-lg">
+                  {{ user.avatar }}
+                </AvatarFallback>
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ user.name }}</span>
@@ -75,31 +84,10 @@ const { isMobile } = useSidebar();
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <Sparkles />
-              Upgrade to Pro
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <BadgeCheck />
-              Account
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CreditCard />
-              Billing
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell />
-              Notifications
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
+
           <DropdownMenuSeparator />
           <NuxtLink to="/">
-            <DropdownMenuItem>
+            <DropdownMenuItem @click="logout">
               <LogOut />
               Sign out
             </DropdownMenuItem>

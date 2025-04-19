@@ -208,8 +208,8 @@ onMounted(async () => {
     <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div class="grid auto-rows-min gap-4 md:grid-cols-1">
         <Card class="h-[50vh] shadow-none border-0 bg-muted/50">
-          <Skeleton v-if="status === 'pending'" class="h-[40vh]" />
-          <BarChart :data="data" />
+          <BarChart v-if="status !== 'pending'" :data="data" />
+          <Skeleton v-else class="h-[50vh] mx-5" />
         </Card>
       </div>
       <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />

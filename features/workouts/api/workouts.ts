@@ -16,13 +16,13 @@ export const pastworkouts = async (id: number) => {
 };
 
 export const workout = async (id: number, exerciseId: number) => {
-  const { data, error } = await Fetch(
+  const res = await Fetch(
     `/Workout/exercises/steps?exerciseId=${exerciseId}&userId=${id}`,
     {
       method: "GET",
     }
   );
-  return data;
+  return res;
 };
 
 export const step = async (id: number, stepId: number) => {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { workout, step } from "~/features/workouts/api/workouts";
 import { getData } from "nuxt-storage/local-storage";
 import { useRoute } from "vue-router";
@@ -8,32 +8,49 @@ const status = ref("pending");
 const workoutTimers = ref({});
 const steps = ref([]);
 const data = ref(null);
+const route = useRoute();
 
 onMounted(async () => {
   const user = getData("user");
-  const { id } = useRoute().params;
-  const res = await workout(user.data.userId, id);
-  data.value = res.value.data;
-  console.log("workout response", res.value.data);
-  if (res !== null) {
-    steps.value = res.value.data.steps.map((step) => ({
-      ...step,
-      title: step.description,
-      time: step.durationMinutes,
-    }));
+  const id = route.params.id;
 
-    // Initialize timers using backend state
-    for (const step of res.value.data.steps) {
-      workoutTimers.value[step.id] = {
-        countdown: step.durationMinutes * 60,
-        totalTime: step.durationMinutes * 60,
-        progress: step.isCompleted ? 100 : 0,
-        isActive: false,
-        isCompleted: step.isCompleted,
-      };
+  console.log("User:", user);
+  console.log("Route ID:", id);
+
+  if (!id || !user?.data?.userId) {
+    console.warn("Missing id or userId");
+    return;
+  }
+
+  try {
+    const res = await workout(user.data.userId, id);
+    console.log("Workout response:", res);
+
+    if (res?.value?.data) {
+      data.value = res.value.data;
+
+      steps.value = res.value.data.steps.map((step) => ({
+        ...step,
+        title: step.description,
+        time: step.durationMinutes,
+      }));
+
+      for (const step of res.value.data.steps) {
+        workoutTimers.value[step.id] = {
+          countdown: step.durationMinutes * 60,
+          totalTime: step.durationMinutes * 60,
+          progress: step.isCompleted ? 100 : 0,
+          isActive: false,
+          isCompleted: step.isCompleted,
+        };
+      }
+
+      status.value = "complete";
+    } else {
+      console.warn("Workout data is empty or invalid", res);
     }
-
-    status.value = "complete";
+  } catch (err) {
+    console.error("Error fetching workout", err);
   }
 });
 
@@ -44,15 +61,14 @@ const formatTime = (val) => {
 };
 
 const startWorkout = (id, durationMinutes) => {
-  // Prevent starting if any other step is already active
-  const isAnyStepActive = Object.entries(workoutTimers.value).some(
-    ([key, val]) => val.isActive
+  const isAnyStepActive = Object.values(workoutTimers.value).some(
+    (step) => step.isActive
   );
 
   if (
-    isAnyStepActive || // another step is running
-    workoutTimers.value[id]?.isActive || // this step is running
-    workoutTimers.value[id]?.isCompleted // this step is done
+    isAnyStepActive ||
+    workoutTimers.value[id]?.isActive ||
+    workoutTimers.value[id]?.isCompleted
   ) {
     return;
   }
@@ -92,8 +108,8 @@ const isAnyStepActive = computed(() =>
 
 const callDummyEndpoint = async (id) => {
   const user = getData("user");
-  const res = await step(user.data.userId, id);
-  console.log("Dummy API call made for step", id);
+  await step(user.data.userId, id);
+  console.log("Step completed and dummy API called for step", id);
 };
 </script>
 
