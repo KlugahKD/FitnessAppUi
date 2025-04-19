@@ -24,18 +24,17 @@ onMounted(async () => {
 
   try {
     const res = await workout(user.data.userId, id);
-    console.log("Workout response:", res);
+    console.log("Workout response:", res.data.value.data.steps);
+    if (res?.data.value.data) {
+      data.value = res.data.value.data;
 
-    if (res?.value?.data) {
-      data.value = res.value.data;
-
-      steps.value = res.value.data.steps.map((step) => ({
+      steps.value = res.data.value.data.steps.map((step) => ({
         ...step,
         title: step.description,
         time: step.durationMinutes,
       }));
 
-      for (const step of res.value.data.steps) {
+      for (const step of res.data.value.data.steps) {
         workoutTimers.value[step.id] = {
           countdown: step.durationMinutes * 60,
           totalTime: step.durationMinutes * 60,
@@ -47,7 +46,8 @@ onMounted(async () => {
 
       status.value = "complete";
     } else {
-      console.warn("Workout data is empty or invalid", res);
+      console.warn("Workout fetch failed", res?.error?.value);
+      status.value = "failed";
     }
   } catch (err) {
     console.error("Error fetching workout", err);
