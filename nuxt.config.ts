@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.API_URL,
+      apiBaseUrl: process.env.API_URL ?? "http://ivandzan-001-site1.otempurl.com/api",
     },
   },
 });

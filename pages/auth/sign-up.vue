@@ -1,349 +1,334 @@
 <script setup lang="ts">
-definePageMeta({
-  layout: "custom",
-});
-import { toTypedSchema } from "@vee-validate/zod";
-import { h, ref } from "vue";
-import * as z from "zod";
-import { signup } from "@/features/auth/api/auth";
-import { useForm } from "vee-validate";
-import {
-  signupStep1,
-  signupStep2,
-  signupStep3,
-  signupSchema, // still needed for final submission
-} from "@/features/auth/schemas/auth";
-import type { SignupForm } from "@/features/auth/schemas/auth";
-import { Check, Circle, Dot } from "lucide-vue-next";
-const router = useRouter();
-import { toast } from "vue-sonner";
-import { getData, setData } from "nuxt-storage/local-storage";
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { signup } from '@/features/auth/api/auth'
+import { getData, setData } from 'nuxt-storage/local-storage'
+import { toast } from 'vue-sonner'
+import { signupStep1, signupStep2, signupStep3, signupSchema } from '@/features/auth/schemas/auth'
+import type { SignupForm } from '@/features/auth/schemas/auth'
+import { Check } from 'lucide-vue-next'
+
+const router = useRouter()
+const stepIndex = ref(1)
+const stepSchemas = [signupStep1, signupStep2, signupStep3]
+const loadingMessages = [
+  'Creating your workout plan...',
+  'Creating your exercises...',
+  'Creating your personalised avatar...',
+  'Creating your personalised health tips...'
+]
+const isLoading = ref(false)
+const loadingText = ref('')
+const currentDoneText = ref('')
+const showDoneText = ref(false)
+
+const formValues = ref<SignupForm>({
+  avatarChoice: '',
+  fitnessGoals: '',
+  howOftenWorkOut: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  dateOfBirth: ''
+})
 
 const form = useForm<SignupForm>({
   validationSchema: toTypedSchema(signupSchema),
-});
+  initialValues: formValues.value
+})
 
-const stepSchemas = [signupStep1, signupStep2, signupStep3];
+const updateField = (field: keyof SignupForm, value: string) => {
+  form.setFieldValue(field, value)
+  formValues.value[field] = value
+}
 
-const stepIndex = ref(1);
 const steps = [
-  {
-    step: 1,
-    title: "Your details",
-  },
-  {
-    step: 2,
-    title: "Your Goals",
-  },
-  {
-    step: 3,
-    title: "Your Avatar",
-  },
-];
+  { step: 1, title: 'Your Details' },
+  { step: 2, title: 'Your Goals' },
+  { step: 3, title: 'Your Avatar' }
+]
 
-const onSubmit = async (values: any) => {
-  console.log("submitted", values);
-  const result = await signup(values);
-  console.log("result", result);
-  if (result) {
-    setData("user", result);
-    toast.success("Account created successfully");
-    router.push("/auth");
-  } else {
-    toast.error("Error creating account");
-    router.replace("/auth/login");
+const animateLoading = async () => {
+  isLoading.value = true
+  for (let i = 0; i < loadingMessages.length; i++) {
+    loadingText.value = loadingMessages[i]
+    showDoneText.value = false
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+    currentDoneText.value = '✓ ' + loadingMessages[i].replace('Creating', '').replace('...', '').trim() + ' done'
+    showDoneText.value = true
+    await new Promise((resolve) => setTimeout(resolve, 2000))
   }
-};
+  isLoading.value = false
+  router.push('/auth')
+}
+
+const onSubmit = async () => {
+  try {
+    const values = formValues.value
+    const result = await signup(values)
+    if (result?.isSuccessful) {
+      setData('user', result.data)
+      await animateLoading()
+      toast.success('Account created successfully')
+    } else {
+      toast.error(result?.message || 'Something went wrong. Please try again.')
+    }
+  } catch (error) {
+    toast.error('Server error. Please check your connection and try again.')
+  }
+}
+
+const isStepComplete = (step: number) => step < stepIndex.value
+
+definePageMeta({
+  layout: 'custom'
+})
 </script>
 
+
+
 <template>
-  <div class="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-    <div
-      class="w-full mx-auto my-auto flex items-center justify-center py-12 grid gap-6"
-    >
-      <div class="grid gap-2 text-center">
-        <h1 class="text-3xl font-bold">Sign Up</h1>
-        <p class="text-balance text-muted-foreground">
-          Enter your details below to create your account
-        </p>
+  <div class="grid min-h-screen lg:grid-cols-2 bg-white text-black">
+    <!-- Loading Screen -->
+    <transition name="fade">
+    <div v-if="isLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white space-y-4">
+      <div class="w-12 h-12 border-4 border-[#C6F600] border-t-transparent rounded-full animate-spin"></div>
+      <div class="text-center">
+        <p class="text-lg font-medium text-gray-700">{{ loadingText }}</p>
+        <p v-if="showDoneText" class="text-green-600 font-semibold mt-2">{{ currentDoneText }}</p>
       </div>
-
-      <Form
-        v-slot="{ meta, values }"
-        as="form"
-        keep-values
-        :validation-schema="toTypedSchema(stepSchemas[stepIndex - 1])"
-      >
-        <form
-          @submit="
-            (e) => {
-              e.preventDefault();
-              onSubmit(values);
-            }
-          "
-        >
-          <div class="grid items-center w-full gap-4">
-            <Stepper
-              v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }"
-              v-model="stepIndex"
-              class="block w-full"
-            >
-              <div class="flex flex-start gap-2">
-                <StepperItem
-                  v-for="step in steps"
-                  :key="step.step"
-                  v-slot="{ state }"
-                  class="relative flex w-full flex-col items-center justify-center"
-                  :step="step.step"
-                >
-                  <StepperSeparator
-                    v-if="step.step !== steps[steps.length - 1].step"
-                    class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-5 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
-                  />
-
-                  <StepperTrigger as-child>
-                    <Button
-                      :variant="
-                        state === 'completed' || state === 'active'
-                          ? 'default'
-                          : 'outline'
-                      "
-                      size="icon"
-                      class="z-10 rounded-full shrink-0"
-                      :class="[
-                        state === 'active' &&
-                          'ring-2 ring-ring ring-offset-2 ring-offset-background',
-                      ]"
-                      :disabled="state !== 'completed' && !meta.valid"
-                    >
-                      <Check v-if="state === 'completed'" class="size-5" />
-                      <Circle v-if="state === 'active'" />
-                      <Dot v-if="state === 'inactive'" />
-                    </Button>
-                  </StepperTrigger>
-
-                  <div class="mt-5 flex flex-col items-center text-center">
-                    <StepperTitle
-                      :class="[state === 'active' && 'text-primary']"
-                      class="text-sm font-semibold transition lg:text-base"
-                    >
-                      {{ step.title }}
-                    </StepperTitle>
-                    <!-- <StepperDescription
-                      :class="[state === 'active' && 'text-primary']"
-                      class="sr-only text-xs text-muted-foreground transition md:not-sr-only lg:text-sm"
-                    >
-                      {{ step.description }}
-                    </StepperDescription> -->
-                  </div>
-                </StepperItem>
-              </div>
-
-              <div class="w-full flex flex-col gap-4 mt-4">
-                <template v-if="stepIndex === 1">
-                  <FormField v-slot="{ componentField }" name="firstName">
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Jane"
-                          v-bind="componentField"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-
-                  <FormField v-slot="{ componentField }" name="lastName">
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Doe"
-                          v-bind="componentField"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-
-                  <FormField v-slot="{ componentField }" name="email">
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="janedoe@gmail.com"
-                          v-bind="componentField"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField v-slot="{ componentField }" name="dateOfBirth">
-                    <FormItem>
-                      <FormLabel>Date Of Birth</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="DD/MM/YYYY"
-                          v-bind="componentField"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField v-slot="{ componentField }" name="password">
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="password"
-                          v-bind="componentField"
-                          required
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                </template>
-
-                <template v-if="stepIndex === 2">
-                  <FormField v-slot="{ componentField }" name="fitnessGoals">
-                    <FormItem>
-                      <FormLabel>Goal</FormLabel>
-
-                      <Select v-bind="componentField">
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a target goal" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value="ImproveEndurance">
-                              Improve Endurance
-                            </SelectItem>
-                            <SelectItem value="LoseWeight">
-                              Lose Weight
-                            </SelectItem>
-                            <SelectItem value="GainMuscle">
-                              Gain Muscle
-                            </SelectItem>
-                            <SelectItem value="IncreaseFlexibility">
-                              Increase Flexibility
-                            </SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField v-slot="{ componentField }" name="howOftenWorkOut">
-                    <FormItem>
-                      <FormLabel>How Often Do You Workout</FormLabel>
-
-                      <Select v-bind="componentField">
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="how many times a week" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value="1-2 times a week">
-                              1-2 times a week
-                            </SelectItem>
-                            <SelectItem value="3-4 times a week">
-                              3-4 times a week
-                            </SelectItem>
-                            <SelectItem value="5-6 times a week">
-                              5-6 times a week
-                            </SelectItem>
-                            <SelectItem value="Everyday"> Everyday </SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                </template>
-
-                <template v-if="stepIndex === 3">
-                  <FormField v-slot="{ componentField }" name="avatarChoice">
-                    <FormItem>
-                      <FormLabel>Avatar Choice</FormLabel>
-
-                      <Select v-bind="componentField">
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="choose an avatar" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value="Core">Core</SelectItem>
-                            <SelectItem value="Pulse">Pulse</SelectItem>
-                            <SelectItem value="Zenith">Zenith</SelectItem>
-                            <SelectItem value="Titan">Titan</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                </template>
-              </div>
-
-              <div class="flex items-center justify-between mt-4">
-                <Button
-                  v-if="stepIndex !== 1"
-                  :disabled="isPrevDisabled"
-                  variant="outline"
-                  size="sm"
-                  @click="prevStep()"
-                >
-                  Back
-                </Button>
-                <Button
-                  v-else
-                  variant="outline"
-                  size="sm"
-                  @click="$router.back()"
-                >
-                  Cancel
-                </Button>
-                <div class="flex items-center gap-3">
-                  <Button
-                    v-if="stepIndex !== 3"
-                    :type="meta.valid ? 'button' : 'submit'"
-                    :disabled="isNextDisabled"
-                    size="sm"
-                    @click="meta.valid && nextStep()"
-                  >
-                    Next
-                  </Button>
-                  <Button v-if="stepIndex === 3" size="sm" type="submit">
-                    Submit
-                  </Button>
-                </div>
-              </div>
-            </Stepper>
-          </div>
-        </form>
-      </Form>
     </div>
-    <div class="hidden bg-muted lg:block">
+  </transition>
+
+    <!-- Left Side Form -->
+    <div class="flex items-center justify-center px-6 py-12">
+      <div class="w-full max-w-xl space-y-8 rounded-xl border border-black/10 bg-white p-6 shadow-xl sm:p-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-extrabold">Create Account</h1>
+          <p class="mt-2 text-sm text-gray-600">Start your fitness journey today</p>
+        </div>
+
+        <Form
+          v-slot="{ meta, handleSubmit }"
+          :validation-schema="toTypedSchema(stepSchemas[stepIndex - 1])"
+        >
+          <form @submit.prevent="handleSubmit(onSubmit)" class="space-y-6">
+            <!-- Step Indicator -->
+            <div class="flex justify-center gap-4">
+              <template v-for="step in steps" :key="step.step">
+                <div class="flex flex-col items-center">
+                  <div
+                    :class="[ 
+                      'w-10 h-10 flex items-center justify-center rounded-full font-semibold',
+                      step.step === stepIndex ? 'bg-[#C6F600] text-black' :
+                      isStepComplete(step.step) ? 'bg-[#C6F600] text-black' : 'bg-gray-200 text-gray-500'
+                    ]"
+                  >
+                    <Check v-if="isStepComplete(step.step)" class="w-5 h-5" />
+                    <span v-else>{{ step.step }}</span>
+                  </div>
+                  <span class="mt-1 text-xs">{{ step.title }}</span>
+                </div>
+              </template>
+            </div>
+
+            <!-- Step 1 -->
+            <div v-if="stepIndex === 1" class="space-y-4">
+              <FormField v-slot="{ componentField }" name="firstName">
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Jane"
+                      v-bind="componentField"
+                      v-model="formValues.firstName"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField v-slot="{ componentField }" name="lastName">
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Doe"
+                      v-bind="componentField"
+                      v-model="formValues.lastName"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField v-slot="{ componentField }" name="email">
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="janedoe@example.com"
+                      v-bind="componentField"
+                      v-model="formValues.email"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField v-slot="{ componentField }" name="dateOfBirth">
+                <FormItem>
+                  <FormLabel>Date of Birth</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="YYYY/DD/MM"
+                      v-bind="componentField"
+                      v-model="formValues.dateOfBirth"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField v-slot="{ componentField }" name="password">
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      v-bind="componentField"
+                      v-model="formValues.password"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
+
+            <!-- Step 2 -->
+            <div v-if="stepIndex === 2" class="space-y-4">
+              <FormField v-slot="{ componentField }" name="fitnessGoals">
+                <FormItem>
+                  <FormLabel>Fitness Goal</FormLabel>
+                  <Select v-bind="componentField" v-model="formValues.fitnessGoals">
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your goal" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="ImproveEndurance">Improve Endurance</SelectItem>
+                        <SelectItem value="LoseWeight">Lose Weight</SelectItem>
+                        <SelectItem value="GainMuscle">Gain Muscle</SelectItem>
+                        <SelectItem value="IncreaseFlexibility">Increase Flexibility</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+              <FormField v-slot="{ componentField }" name="howOftenWorkOut">
+                <FormItem>
+                  <FormLabel>Workout Frequency</FormLabel>
+                  <Select v-bind="componentField" v-model="formValues.howOftenWorkOut">
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Times per week" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="1-2 times a week">1-2 times</SelectItem>
+                        <SelectItem value="3-4 times a week">3-4 times</SelectItem>
+                        <SelectItem value="5-6 times a week">5-6 times</SelectItem>
+                        <SelectItem value="Everyday">Everyday</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
+
+            <!-- Step 3 -->
+            <div v-if="stepIndex === 3" class="space-y-4">
+              <FormField v-slot="{ componentField }" name="avatarChoice">
+                <FormItem>
+                  <FormLabel>Choose an Avatar</FormLabel>
+                  <div class="grid grid-cols-2 gap-4">
+                    <label
+                      v-for="avatar in ['Core', 'Pulse', 'Zenith', 'Titan']"
+                      :key="avatar"
+                      @click="formValues.avatarChoice = avatar"
+                      :class="[ 
+                        'flex flex-col items-center cursor-pointer border rounded-lg p-4 hover:shadow-md',
+                        formValues.avatarChoice === avatar ? 'border-[#C6F600] ring-2 ring-[#C6F600]' : 'border-gray-300'
+                      ]"
+                    >
+                      <img :src="`/avatars/${avatar.toLowerCase()}.png`" :alt="avatar" class="w-16 h-16 mb-2 object-contain" />
+                      <input type="radio" :value="avatar" v-bind="componentField" class="hidden" />
+                      <span class="text-sm font-medium">{{ avatar }}</span>
+                    </label>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                @click="stepIndex === 1 ? router.back() : stepIndex--"
+              >
+                {{ stepIndex === 1 ? 'Cancel' : 'Back' }}
+              </Button>
+              <Button
+                v-if="stepIndex < 3"
+                type="button"
+                class="bg-[#C6F600] text-black hover:bg-lime-400"
+                size="sm"
+                @click="meta.valid && stepIndex++"
+              >
+                Next
+              </Button>
+              <Button v-else type="submit" size="sm" class="bg-black text-white hover:bg-gray-900">
+                Submit
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </div>
+
+    <!-- Right Side Background -->
+    <div class="relative hidden lg:block">
       <img
         src="/authbackground.jpg"
-        alt="Image"
-        width="1920"
-        height="1080"
-        class="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        alt="Fitness"
+        class="absolute inset-0 h-full w-full object-cover"
       />
+      <div class="absolute inset-0 bg-black/60 flex items-center justify-center text-center text-white px-6">
+        <div>
+          <h2 class="text-3xl lg:text-5xl font-bold">Train Smart. Live Better.</h2>
+          <p class="mt-4 text-[#C6F600] text-base max-w-md mx-auto">
+            Build a personalized fitness path with our avatars and expert guidance.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
