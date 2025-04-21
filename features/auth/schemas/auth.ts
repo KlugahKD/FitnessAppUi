@@ -11,8 +11,15 @@ const stepOne = z.object({
   email: z.string().email("Invalid email"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  dateOfBirth: z.string().min(10, "Date must be in YYYY-MM-DD format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[\W_]/, "Password must contain at least one special character"),
 });
 
 const stepTwo = z.object({
