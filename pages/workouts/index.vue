@@ -1,161 +1,113 @@
 <template>
-  <div class="p-4">
-    <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <!-- Health Advice Section -->
-      <div>
-        <h1 class="text-xl text-gray-500 p-5">Start A Workout</h1>
-        <div v-if="status === 'complete'">
-          <div
-            v-if="currentWorkoutsData.length === 0"
-            class="text-center py-10 text-gray-400 text-lg"
-          >
-            <Card
-              class="flex align-center justify-center h-50 shadow-none mb-4 border-0 rounded-xl bg-muted/50 text-gray-500"
-              >No workouts for today!</Card
-            >
+  <div class="bg-white min-h-screen">
+    <div class="max-w-7xl mx-auto p-6 space-y-8">
+      <!-- Hero Section -->
+      <div class="bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-400 rounded-2xl p-6 mb-6">
+        <div class="flex items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">FitLife</h1>
+            <p class="text-gray-600">Push your limits, achieve your goals</p>
           </div>
-          <div
-            v-else
-            v-for="(item, index) in currentWorkoutsData"
-            :key="'health-' + index"
-            class="grid auto-rows-min gap-4 md:grid-cols-3"
-          >
-            <Card
-              class="shadow-none mb-4 border-0 rounded-xl bg-muted/50 col-span-2"
-            >
-              <CardHeader>
-                <CardTitle class="px-3">{{ item.name }}</CardTitle>
-                <CardDescription class="text-sm text-gray-500 px-3">
-                  {{ item.description }}
-                </CardDescription>
-                <Button
-                  @click="onSubmit(item.id)"
-                  class="mt-8 rounded-xl w-3xs"
-                >
-                  {{
-                    item.isCompleted
-                      ? "Completed Workout"
-                      : item.isStarted
-                      ? "In Progress..."
-                      : "Start Workout"
-                  }}
-                </Button>
-              </CardHeader>
-            </Card>
-
-            <Card
-              class="shadow-none border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
-            >
-              <img
-                :src="'/' + item.img + '.jpg'"
-                alt="Fitness tip"
-                class="w-full h-full object-cover rounded-xl"
-              />
-            </Card>
-          </div>
-        </div>
-
-        <div
-          v-else
-          class="grid auto-rows-min gap-4 md:grid-cols-3"
-          v-for="n in 2"
-          :key="'skeleton-health-' + n"
-        >
-          <Card
-            class="shadow-none mb-4 border-0 rounded-xl bg-muted/50 col-span-2"
-          >
-            <CardHeader>
-              <Skeleton class="h-6 w-1/3 mb-2" />
-              <Skeleton class="h-4 w-3/4 mb-2" />
-              <Skeleton class="h-4 w-1/2" />
-              <Skeleton class="h-10 w-32 mt-6 rounded-xl" />
-            </CardHeader>
-          </Card>
-
-          <Card
-            class="shadow-none border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
-          >
-            <Skeleton class="w-full h-full min-h-[150px] rounded-xl" />
-          </Card>
-        </div>
-      </div>
-
-      <div>
-        <h1 class="text-xl text-gray-500 p-5">Past Workouts</h1>
-
-        <div v-if="status === 'complete'">
-          <div
-            v-if="pastWorkoutsData.length === 0"
-            class="text-center py-10 text-gray-400 text-lg"
-          >
-            <Card
-              class="flex align-center justify-center h-50 shadow-none mb-4 border-0 rounded-xl bg-muted/50 text-gray-500"
-              >No workout history!</Card
-            >
-          </div>
-          <div
-            v-for="(item, index) in pastWorkoutsData"
-            :key="'past-' + index"
-            class="flex flex-row gap-4"
-          >
-            <Card
-              class="shadow-none size-24 border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
-            >
-              <img
-                :src="'/' + item.img + '.jpg'"
-                alt="Fitness tip"
-                class="w-full h-full object-cover rounded-xl"
-              />
-            </Card>
-
-            <Card
-              class="shadow-none w-full mb-4 border-0 rounded-xl bg-muted/50"
-            >
-              <CardHeader>
-                <div class="flex flex-row justify-between items-center">
-                  <div>
-                    <CardTitle class="px-3">{{ item.name }}</CardTitle>
-                    <CardDescription class="text-sm text-gray-500 px-3">
-                      {{ item.description }}
-                    </CardDescription>
-                  </div>
-                  <Badge
-                    class="rounded-xl w-fit text-white"
-                    :class="item.isCompleted ? 'bg-green-100' : 'bg-red-400'"
-                  >
-                    {{ item.isCompleted ? "completed" : "missed" }}
-                  </Badge>
-                </div>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-
-        <div
-          v-else
-          v-for="n in 2"
-          :key="'skeleton-past-' + n"
-          class="flex flex-row gap-4"
-        >
-          <Card
-            class="shadow-none size-24 border-0 rounded-xl mb-4 bg-muted/50 overflow-hidden p-0"
-          >
-            <Skeleton class="w-full h-full rounded-xl" />
-          </Card>
-
-          <Card class="shadow-none w-full mb-4 border-0 rounded-xl bg-muted/50">
-            <CardHeader>
-              <div class="flex flex-row justify-between items-center">
-                <div class="w-full">
-                  <Skeleton class="h-6 w-1/2 mb-2" />
-                  <Skeleton class="h-4 w-3/4" />
-                </div>
-                <Skeleton class="h-6 w-20 rounded-xl" />
+          <div class="ml-auto">
+            <div class="bg-black bg-opacity-5 p-2 rounded-full">
+              <div class="w-10 h-10 bg-A3F300 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <!-- Start A Workout -->
+      <div>
+        <h1 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <span class="mr-2">TODAY'S WORKOUTS</span>
+          <span class="bg-A3F300 h-1 flex-grow rounded-full ml-2"></span>
+        </h1>
+        
+        <div v-if="status === 'complete'">
+          <div v-if="currentWorkoutsData.length === 0" class="text-center py-8">
+            <div class="bg-f6fef2 rounded-2xl p-8 flex flex-col items-center shadow-sm">
+              <p class="text-gray-500 text-lg font-medium">No workouts scheduled for today!</p>
+            </div>
+          </div>
+          
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              v-for="(item, index) in currentWorkoutsData"
+              :key="'health-' + index"
+              class="bg-f6fef2 rounded-2xl overflow-hidden shadow-sm"
+            >
+              <div class="aspect-video w-full relative">
+                <img :src="'/' + item.img + '.jpg'" alt="Workout image" class="w-full h-full object-cover" />
+                <div class="absolute bottom-4 left-4">
+                  <span 
+                    class="text-white px-4 py-1 rounded-full text-xs font-bold"
+                    :class="item.isStarted ? 'bg-yellow-500' : item.isCompleted ? 'bg-A3F300' : 'bg-A3F300'"
+                  >
+                    {{ item.isCompleted ? "COMPLETED" : item.isStarted ? "IN PROGRESS" : "READY" }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ item.name }}</h3>
+                <p class="text-gray-500 mb-6">{{ item.description }}</p>
+                <button 
+                  @click="onSubmit(item.id)" 
+                  class="w-full bg-A3F300 hover:bg-8dd800 text-gray-800 py-3 px-6 rounded-xl font-bold transition duration-200"
+                >
+                  {{ item.isCompleted ? "VIEW COMPLETED" : item.isStarted ? "CONTINUE WORKOUT" : "START WORKOUT" }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-for="n in 2" :key="'skeleton-health-' + n" class="bg-f6fef2 rounded-2xl overflow-hidden shadow-sm">
+            <div class="aspect-video w-full">
+              <div class="w-full h-full bg-gray-200 animate-pulse"></div>
+            </div>
+            <div class="p-6">
+              <div class="h-6 w-1/2 bg-gray-200 rounded-full mb-4 animate-pulse"></div>
+              <div class="h-4 w-3/4 bg-gray-200 rounded-full mb-3 animate-pulse"></div>
+              <div class="h-4 w-1/2 bg-gray-200 rounded-full mb-6 animate-pulse"></div>
+              <div class="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Past Workouts -->
+
+      <h1 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <span class="mr-2">WORKOUT HISTORY</span>
+          <span class="bg-A3F300 h-1 flex-grow rounded-full ml-2"></span>
+        </h1>
+
+      <div
+  v-for="(item, index) in pastWorkoutsData"
+  :key="'past-' + index"
+  class="flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition"
+>
+  <div class="flex items-center gap-4">
+    <img :src="'/' + item.img + '.jpg'" class="w-16 h-16 rounded-lg object-cover" />
+    <div>
+      <h4 class="font-bold text-gray-800">{{ item.name }}</h4>
+      <p class="text-gray-500 text-sm">{{ item.description }}</p>
+    </div>
+  </div>
+  <span 
+    class="mt-3 sm:mt-0 px-3 py-1 rounded-full text-xs font-semibold"
+    :class="item.isCompleted ? 'bg-green-500 text-white' : 'bg-red-100 text-red-600'"
+  >
+    {{ item.isCompleted ? "COMPLETED" : "MISSED" }}
+  </span>
+</div>
+
     </div>
   </div>
 </template>
@@ -167,34 +119,11 @@ import { getData } from "nuxt-storage/local-storage";
 
 const status = ref("pending");
 const router = useRouter();
-const currentWorkoutsData = ref([
-  // {
-  //   title: "Yoga for Beginners",
-  //   description: "Aim at sleeping 7-8 hours a day to improve your health.",
-  //   image: "/health2.jpg",
-  // },
-  // {
-  //   title: "Full Body Workout",
-  //   description: "workout for 30 minutes a day to stay fit.",
-  //   image: "/health3.jpg",
-  // },
-]);
-const pastWorkoutsData = ref([
-  // {
-  //   title: "Yoga for Beginners",
-  //   description: "Aim at sleeping 7-8 hours a day to improve your health.",
-  //   image: "/health2.jpg",
-  // },
-  // {
-  //   title: "Full Body Workout",
-  //   description: "workout for 30 minutes a day to stay fit.",
-  //   image: "/health3.jpg",
-  // },
-]);
+const currentWorkoutsData = ref([]);
+const pastWorkoutsData = ref([]);
 
 onMounted(async () => {
   const interval = setInterval(async () => {
-    // status.value = "pending";
     const user = getData("user");
     clearInterval(interval);
     console.log("user", user.data.userId);
@@ -214,3 +143,19 @@ function onSubmit(id) {
   router.push(`/workouts/${id}`);
 }
 </script>
+
+<style>
+/* Custom color classes for the theme */
+.bg-A3F300 {
+  background-color: #A3F300;
+}
+.bg-8dd800 {
+  background-color: #8dd800;
+}
+.bg-f6fef2 {
+  background-color: #f6fef2;
+}
+.border-A3F300 {
+  border-color: #A3F300;
+}
+</style>

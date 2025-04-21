@@ -31,7 +31,7 @@ onMounted(async () => {
 
     if (!user || !user?.data?.userId) {
       clearInterval(interval);
-      console.log("⚠️ No user found, redirecting to auth...");
+      console.log("\u26a0\ufe0f No user found, redirecting to auth...");
       router.push("/auth");
       return;
     }
@@ -39,10 +39,7 @@ onMounted(async () => {
     clearInterval(interval);
 
     const userId = user.data.userId;
-    console.log("userId", userId);
-
     const res = await dashboard(userId);
-    console.log("dashboard response", res);
 
     if (res !== null) {
       status.value = "complete";
@@ -55,164 +52,206 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mx-4 text-center">
-      <Card class="shadow-none border-0 bg-muted/50">
+  <main class="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Overview Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+      <Card class="bg-muted/50 p-4 rounded-xl">
         <CardHeader>
           <CardTitle class="text-sm text-gray-500">Weather</CardTitle>
-          <CardDescription class="text-2xl font-bold mt-2 text-black">
+          <CardDescription class="text-3xl font-bold text-black mt-2">
             <Skeleton v-if="status === 'pending'" class="h-8" />
             <span v-else>{{ UserData?.data?.temperature }}°C</span>
           </CardDescription>
-          <CloudSunRain />
+          <CloudSunRain class="mx-auto mt-4" />
         </CardHeader>
       </Card>
-      <Card class="shadow-none border-0 bg-muted/50">
+
+      <Card class="bg-muted/50 p-4 rounded-xl">
         <CardHeader>
           <CardTitle class="text-sm text-gray-500">Workouts</CardTitle>
-          <CardDescription class="text-2xl font-bold mt-2 text-black">
+          <CardDescription class="text-3xl font-bold text-black mt-2">
             <Skeleton v-if="status === 'pending'" class="h-8" />
-            <span v-else>
-              {{ UserData?.data?.totalWorkouts }}
-            </span>
-            <Dumbbell />
+            <span v-else>{{ UserData?.data?.totalWorkouts }}</span>
           </CardDescription>
+          <Dumbbell class="mx-auto mt-4" />
         </CardHeader>
       </Card>
 
-      <Card class="shadow-none border-0 bg-muted/50">
+      <Card class="bg-muted/50 p-4 rounded-xl">
         <CardHeader>
           <CardTitle class="text-sm text-gray-500">Streak</CardTitle>
-          <CardDescription class="text-2xl font-bold mt-2 text-black">
+          <CardDescription class="text-3xl font-bold text-black mt-2">
             <Skeleton v-if="status === 'pending'" class="h-8" />
-            <span v-else>
-              {{ UserData?.data?.streak }}
-            </span>
-            <Zap />
+            <span v-else>{{ UserData?.data?.streak }}</span>
           </CardDescription>
+          <Zap class="mx-auto mt-4" />
         </CardHeader>
       </Card>
 
-      <Card class="shadow-none border-0 bg-muted/50">
+      <Card class="bg-muted/50 p-4 rounded-xl">
         <CardHeader>
           <CardTitle class="text-sm text-gray-500">Days Worked Out</CardTitle>
-          <CardDescription class="text-2xl font-bold mt-2 text-black">
+          <CardDescription class="text-3xl font-bold text-black mt-2">
             <Skeleton v-if="status === 'pending'" class="h-8" />
-            <span v-else>
-              {{ UserData?.data?.daysWorkedOut }}
-            </span>
-            <CalendarDays />
+            <span v-else>{{ UserData?.data?.daysWorkedOut }}</span>
           </CardDescription>
+          <CalendarDays class="mx-auto mt-4" />
         </CardHeader>
       </Card>
     </div>
-    <div class="mx-4 grid auto-rows-min gap-4 md:grid-cols-3 text-center">
-      <Card class="shadow-none border-0 bg-muted/50">
-        <CardHeader>
-          <CardTitle class="text-sm text-gray-500">Motivation</CardTitle>
-          <CardDescription
-            class="flex flex-col text-2xl mt-4 font-bold text-black"
-          >
-            <Skeleton v-if="status === 'pending'" class="h-48" />
-            <div class="space-y-12" v-else>
-              <Avatar class="mx-auto">
-                <AvatarImage
-                  src="https://github.com/unovue.png"
-                  alt="@unovue"
-                />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <span class="text-sm text-gray-500">
+
+    <!-- Motivation + Weekly Summary -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Motivation -->
+      <div class="bg-muted/50 p-6 rounded-xl shadow-md w-full">
+        <p class="text-sm text-gray-500 font-semibold mb-4">Motivation</p>
+        <Skeleton v-if="status === 'pending'" class="h-48 w-full rounded-lg" />
+        <template v-else>
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 w-full">
+            <div class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-[4px] border-[#C6F600] shadow-lg animate-pulse-soft shrink-0">
+              <img
+                src="/avatars/motivational-coach.png"
+                alt="Motivational Coach"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="speech-bubble text-sm md:text-base text-gray-800 font-medium italic leading-relaxed max-w-[300px]">
+              <span class="typewriter block">
                 {{
-                  UserData?.data?.motivationalMessage ||
+                  UserData?.data?.motivationalMessage ??
                   "The only bad workout is the one that didn't happen."
                 }}
               </span>
             </div>
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="flex flex-col mt-4 items-center justify-center">
-        </CardContent>
-      </Card>
-      <Card class="shadow-none border-0 bg-muted/50 col-span-2">
+          </div>
+        </template>
+      </div>
+
+      <!-- Weekly Summary -->
+      <Card class="bg-muted/50 p-6 rounded-xl text-center">
         <CardHeader>
-          <CardTitle class="text-sm text-gray-500 mb-4"
-            >Weekly Summary</CardTitle
-          >
-          <div v-if="status !== 'pending'" class="space-y-6 text-black">
-            <!-- First Row -->
-            <div class="grid grid-cols-3 gap-4 text-center px-2">
+          <CardTitle class="text-sm text-gray-500 mb-4">Weekly Summary</CardTitle>
+          <Skeleton v-if="status === 'pending'" class="h-48" />
+          <template v-else>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <p class="text-sm text-gray-500">Workouts</p>
                 <p class="text-xl font-bold">
                   {{ UserData?.data?.weeklyStats?.completedWorkouts }}
                 </p>
-                <p class="text-xs text-green-600"></p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Days Worked Out</p>
                 <p class="text-xl font-bold">
                   {{ UserData?.data?.weeklyStats?.daysWorkedOut }}
                 </p>
-                <p class="text-xs text-green-600"></p>
               </div>
               <div>
-                <p class="text-sm text-gray-500">Total Weekly Work Outs</p>
+                <p class="text-sm text-gray-500">Total Weekly Workouts</p>
                 <p class="text-xl font-bold">
                   {{ UserData?.data?.weeklyStats?.totalWorkoutsForTheWeek }}
                 </p>
-                <p class="text-xs text-green-600"></p>
               </div>
-            </div>
-
-            <!-- Second Row -->
-            <div class="grid grid-cols-3 gap-4 text-center mt-5 mb-4 px-2">
               <div>
                 <p class="text-sm text-gray-500">Active Minutes</p>
                 <p class="text-xl font-bold">
                   {{ UserData?.data?.weeklyStats?.totalWorkoutTime }}
                 </p>
-                <p class="text-xs text-gray-400"></p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Avg. Workout Time</p>
                 <p class="text-xl font-bold">
                   {{ UserData?.data?.avgWorkoutTime }}
                 </p>
-                <p class="text-xs text-gray-400"></p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Goal Completion</p>
                 <p class="text-xl font-bold">
                   {{ UserData?.data?.goalCompletionPercentage }}%
                 </p>
-                <p class="text-xs text-gray-400"></p>
               </div>
             </div>
-
-            <!-- Goal Progress -->
-            <div class="px-2">
-              <p class="text-sm text-gray-500 mb-4 mt-8">
-                Weekly Goal Progress
-              </p>
+            <div class="mt-6 text-left">
+              <p class="text-sm text-gray-500 mb-2">Weekly Goal Progress</p>
               <Progress v-model="progress" />
-              <p class="text-sm text-gray-400 mt-4">
+              <p class="text-xs text-gray-400 mt-2">
                 {{ UserData?.data?.goalCompletionDetails }}
               </p>
             </div>
-          </div>
-          <Skeleton v-else class="h-48" />
+          </template>
         </CardHeader>
       </Card>
     </div>
-    <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div class="grid auto-rows-min gap-4 md:grid-cols-1">
-        <Card class="h-[50vh] shadow-none border-0 bg-muted/50">
-          <BarChart v-if="status !== 'pending'" :data="data" />
-          <Skeleton v-else class="h-[50vh] mx-5" />
-        </Card>
-      </div>
-      <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+
+    <!-- Chart -->
+    <div class="grid grid-cols-1">
+      <Card class="bg-muted/50 p-6 rounded-xl min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
+        <Skeleton v-if="status === 'pending'" class="h-full" />
+        <BarChart v-else :data="data" />
+      </Card>
     </div>
   </main>
 </template>
+
+<style scoped>
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.speech-bubble {
+  position: relative;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  max-width: 300px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  word-break: break-word;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-right: 10px solid #fff;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+}
+
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid rgba(0, 0, 0, 0.2);
+  animation: typing 3s steps(30, end), blink 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+</style>
