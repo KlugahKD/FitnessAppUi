@@ -3,6 +3,8 @@ import { useNav } from "@/composables/useNav";
 import { useRoute } from "vue-router";
 import { computed } from "vue";
 
+import FloatingAssistant from "@/components/FloatingAssistant.vue";
+
 const route = useRoute();
 const { navMain } = useNav();
 
@@ -10,6 +12,9 @@ const breadcrumbTitle = computed(() => {
   const match = navMain.find((item) => item.url === route.path);
   return match?.title || "Page";
 });
+
+const hideAssistantOn = ["/avatar"];
+const showAssistant = computed(() => !hideAssistantOn.includes(route.path));
 </script>
 
 <template>
@@ -25,16 +30,20 @@ const breadcrumbTitle = computed(() => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage
-                    ><h3>{{ breadcrumbTitle }}</h3></BreadcrumbPage
-                  >
+                  <BreadcrumbPage>
+                    <h3>{{ breadcrumbTitle }}</h3>
+                  </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <slot></slot>
+
+        <slot />
       </SidebarInset>
+
+      <!-- 🧠 Floating AI Assistant -->
+      <FloatingAssistant v-if="showAssistant" />
     </SidebarProvider>
   </ClientOnly>
 </template>
