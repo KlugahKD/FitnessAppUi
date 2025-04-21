@@ -4,7 +4,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { signup } from '@/features/auth/api/auth'
-import { getData, setData } from 'nuxt-storage/local-storage'
+import nuxtStorage from 'nuxt-storage';
 import { toast } from 'vue-sonner'
 import { signupStep1, signupStep2, signupStep3, signupSchema } from '@/features/auth/schemas/auth'
 import type { SignupForm } from '@/features/auth/schemas/auth'
@@ -70,7 +70,7 @@ const onSubmit = async () => {
     const values = formValues.value
     const result = await signup(values)
     if (result?.isSuccessful) {
-      setData('user', result.data)
+      nuxtStorage.localStorage.setData('user', result.data)
       await animateLoading()
       toast.success('Account created successfully')
     } else {

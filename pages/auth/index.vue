@@ -3,7 +3,7 @@ import { useForm } from "vee-validate";
 import { loginSchema } from "@/features/auth/schemas/auth";
 import { login } from "@/features/auth/api/auth";
 import type { LoginForm } from "@/features/auth/schemas/auth";
-import { setData } from "nuxt-storage/local-storage";
+import nuxtStorage from 'nuxt-storage';
 import { toTypedSchema } from "@vee-validate/zod";
 
 definePageMeta({
@@ -18,7 +18,7 @@ const form = useForm<LoginForm>({
 
 const onSubmit = form.handleSubmit(async (values: LoginForm) => {
   const result = await login(values);
-  setData("user", result, 60 * 60 * 24 * 7);
+  nuxtStorage.localStorage.setData("user", result, 60 * 60 * 24 * 7);
   router.push("/dashboard");
 });
 </script>
