@@ -109,7 +109,7 @@
           >
             <div class="relative">
               <img
-                :src="item.image"
+                :src="'/' + item.img + '.jpg'"
                 :alt="item.title"
                 class="w-full h-48 object-cover"
               />
