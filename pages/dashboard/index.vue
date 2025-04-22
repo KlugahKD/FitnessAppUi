@@ -54,7 +54,9 @@ onMounted(async () => {
 <template>
   <main class="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 py-6">
     <!-- Overview Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center"
+    >
       <Card class="bg-muted/50 p-4 rounded-xl">
         <CardHeader>
           <CardTitle class="text-sm text-gray-500">Weather</CardTitle>
@@ -107,16 +109,20 @@ onMounted(async () => {
         <p class="text-sm text-gray-500 font-semibold mb-4">Motivation</p>
         <Skeleton v-if="status === 'pending'" class="h-48 w-full rounded-lg" />
         <template v-else>
-          <div class="flex flex-col items-center sm:items-start gap-4 sm:gap-6 w-full flex-wrap">
-            <div class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-[4px] border-[#C6F600] shadow-lg animate-pulse-soft shrink-0">
+          <div
+            class="flex flex-col items-center sm:items-start gap-4 sm:gap-6 w-full flex-wrap"
+          >
+            <div
+              class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-[4px] border-[#C6F600] shadow-lg animate-pulse-soft shrink-0"
+            >
               <img
                 src="/avatars/motivational-coach.png"
                 alt="Motivational Coach"
                 class="w-full h-full object-cover"
               />
             </div>
-            <div class="speech-bubble text-sm md:text-base text-gray-800 font-medium italic leading-relaxed max-w-[300px]">
-              <span class="typewriter block">
+            <div class="speech-bubble">
+              <span class="block whitespace-pre-wrap break-words">
                 {{
                   UserData?.data?.motivationalMessage ??
                   "The only bad workout is the one that didn't happen."
@@ -130,7 +136,9 @@ onMounted(async () => {
       <!-- Weekly Summary -->
       <Card class="bg-muted/50 p-6 rounded-xl text-center">
         <CardHeader>
-          <CardTitle class="text-sm text-gray-500 mb-4">Weekly Summary</CardTitle>
+          <CardTitle class="text-sm text-gray-500 mb-4"
+            >Weekly Summary</CardTitle
+          >
           <Skeleton v-if="status === 'pending'" class="h-48" />
           <template v-else>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -169,7 +177,7 @@ onMounted(async () => {
                 <p class="text-xl font-bold">
                   {{ Math.round(UserData?.data?.goalCompletionPercentage) }}%
                 </p>
-                </div>
+              </div>
             </div>
             <div class="mt-6 text-left">
               <p class="text-sm text-gray-500 mb-2">Weekly Goal Progress</p>
@@ -185,19 +193,22 @@ onMounted(async () => {
 
     <!-- Chart -->
     <div class="grid grid-cols-1">
-      <Card class="bg-muted/50 p-6 rounded-xl min-h-[300px] sm:min-h-[350px] md:min-h-[400px] w-full overflow-x-auto">
-  <div class="min-w-[400px] sm:min-w-full">
-    <Skeleton v-if="status === 'pending'" class="h-full" />
-    <BarChart v-else :data="data" />
-  </div>
-</Card>
+      <Card
+        class="bg-muted/50 p-6 rounded-xl min-h-[300px] sm:min-h-[350px] md:min-h-[400px] w-full overflow-x-auto"
+      >
+        <div class="min-w-[400px] sm:min-w-full">
+          <Skeleton v-if="status === 'pending'" class="h-full" />
+          <BarChart v-else :data="data" />
+        </div>
+      </Card>
     </div>
   </main>
 </template>
 
 <style scoped>
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -217,14 +228,18 @@ onMounted(async () => {
   border-radius: 1rem;
   padding: 1rem 1.25rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  max-width: 100%;
+  width: max-content;
+  max-width: 90%;
   word-wrap: break-word;
   word-break: break-word;
-  max-width: 90%;
-  width: fit-content;
+  overflow-wrap: break-word;
+  text-align: center;
+  display: inline-block;
 }
 
 .speech-bubble::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -10px;
   top: 50%;
