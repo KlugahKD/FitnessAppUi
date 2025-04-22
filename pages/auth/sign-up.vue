@@ -18,16 +18,19 @@ import { Check } from "lucide-vue-next";
 const router = useRouter();
 const stepIndex = ref(1);
 const stepSchemas = [signupStep1, signupStep2, signupStep3];
+
 const loadingMessages = [
   "Creating your workout plan...",
   "Creating your exercises...",
   "Creating your personalised avatar...",
   "Creating your personalised health tips...",
 ];
+
 const isLoading = ref(false);
 const loadingText = ref("");
 const currentDoneText = ref("");
 const showDoneText = ref(false);
+const serverError = ref("");
 
 const formValues = ref<SignupForm>({
   avatarChoice: "",
@@ -57,7 +60,6 @@ const steps = [
 ];
 
 const animateLoading = async () => {
-  isLoading.value = true;
   for (let i = 0; i < loadingMessages.length; i++) {
     loadingText.value = loadingMessages[i];
     showDoneText.value = false;
@@ -74,18 +76,30 @@ const animateLoading = async () => {
 };
 
 const onSubmit = async () => {
+  isLoading.value = true;
+  serverError.value = ""; // clear any previous error
+
   try {
     const values = formValues.value;
     const result = await signup(values);
+
     if (result?.isSuccessful) {
       nuxtStorage.localStorage.setData("user", result.data);
-      await animateLoading();
       toast.success("Account created successfully");
+      await animateLoading();
     } else {
-      toast.error(result?.message || "Something went wrong. Please try again.");
+      const errorMessage =
+        result?.message || "Something went wrong. Please try again.";
+      toast.error(errorMessage);
+      serverError.value = errorMessage;
+      isLoading.value = false;
     }
   } catch (error) {
-    toast.error("Server error. Please check your connection and try again.");
+    const fallbackMessage =
+      "Server error. Please check your connection and try again.";
+    toast.error(fallbackMessage);
+    serverError.value = fallbackMessage;
+    isLoading.value = false;
   }
 };
 
@@ -132,6 +146,11 @@ definePageMeta({
           v-slot="{ meta, handleSubmit }"
           :validation-schema="toTypedSchema(stepSchemas[stepIndex - 1])"
         >
+          <!-- Inline server error display -->
+          <p v-if="serverError" class="text-sm text-red-600 text-center -mt-2">
+            {{ serverError }}
+          </p>
+
           <form @submit.prevent="handleSubmit(onSubmit)" class="space-y-6">
             <!-- Step Indicator -->
             <div class="flex justify-center gap-4">

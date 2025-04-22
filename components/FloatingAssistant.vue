@@ -21,7 +21,7 @@
         class="w-[90vw] max-w-md h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
       >
         <div class="bg-A3F300 px-4 py-3 flex items-center justify-between">
-          <h2 class="text-black font-bold">Hi! I'm Ava 👋</h2>
+          <h2 class="text-black font-bold">Hi!👋</h2>
           <button @click="toggleOpen" class="text-black hover:text-gray-700 text-xl">×</button>
         </div>
         <div class="flex-1 bg-gray-50 p-4 overflow-y-auto">
