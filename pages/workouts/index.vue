@@ -37,7 +37,7 @@
           <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div
               v-for="(item, index) in currentWorkoutsData"
-              :key="'health-' + index"
+              :key="'workout-' + index"
               class="bg-f6fef2 rounded-2xl overflow-hidden shadow-sm"
             >
               <div class="aspect-video w-full relative">

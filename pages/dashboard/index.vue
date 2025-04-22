@@ -167,9 +167,9 @@ onMounted(async () => {
               <div>
                 <p class="text-sm text-gray-500">Goal Completion</p>
                 <p class="text-xl font-bold">
-                  {{ UserData?.data?.goalCompletionPercentage }}%
+                  {{ Math.round(UserData?.data?.goalCompletionPercentage) }}%
                 </p>
-              </div>
+                </div>
             </div>
             <div class="mt-6 text-left">
               <p class="text-sm text-gray-500 mb-2">Weekly Goal Progress</p>
@@ -185,10 +185,12 @@ onMounted(async () => {
 
     <!-- Chart -->
     <div class="grid grid-cols-1">
-      <Card class="bg-muted/50 p-6 rounded-xl min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
-        <Skeleton v-if="status === 'pending'" class="h-full" />
-        <BarChart v-else :data="data" />
-      </Card>
+      <Card class="bg-muted/50 p-6 rounded-xl min-h-[300px] sm:min-h-[350px] md:min-h-[400px] w-full overflow-x-auto">
+  <div class="min-w-[400px] sm:min-w-full">
+    <Skeleton v-if="status === 'pending'" class="h-full" />
+    <BarChart v-else :data="data" />
+  </div>
+</Card>
     </div>
   </main>
 </template>
