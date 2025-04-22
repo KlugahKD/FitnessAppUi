@@ -107,7 +107,7 @@ onMounted(async () => {
         <p class="text-sm text-gray-500 font-semibold mb-4">Motivation</p>
         <Skeleton v-if="status === 'pending'" class="h-48 w-full rounded-lg" />
         <template v-else>
-          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 w-full">
+          <div class="flex flex-col items-center sm:items-start gap-4 sm:gap-6 w-full flex-wrap">
             <div class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-[4px] border-[#C6F600] shadow-lg animate-pulse-soft shrink-0">
               <img
                 src="/avatars/motivational-coach.png"
@@ -216,9 +216,11 @@ onMounted(async () => {
   background: #fff;
   border-radius: 1rem;
   padding: 1rem 1.25rem;
-  max-width: 300px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  word-wrap: break-word;
   word-break: break-word;
+  max-width: 90%;
+  width: fit-content;
 }
 
 .speech-bubble::before {
