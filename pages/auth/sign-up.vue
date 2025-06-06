@@ -77,10 +77,11 @@ const animateLoading = async () => {
 
 const onSubmit = async () => {
   isLoading.value = true;
-  serverError.value = ""; // clear any previous error
+  serverError.value = ""; 
 
   try {
     const values = formValues.value;
+    console.log("Form values being sent:", values);
     const result = await signup(values);
 
     if (result?.isSuccessful) {
@@ -94,13 +95,13 @@ const onSubmit = async () => {
       serverError.value = errorMessage;
       isLoading.value = false;
     }
-  } catch (error) {
-    const fallbackMessage =
-      "Server error. Please check your connection and try again.";
-    toast.error(fallbackMessage);
-    serverError.value = fallbackMessage;
-    isLoading.value = false;
-  }
+  } catch (error: any) {
+  const apiErrorMessage =
+    error?.response?.data?.message || "Something went wrong. Please try again.";
+  toast.error(apiErrorMessage);
+  serverError.value = apiErrorMessage;
+  isLoading.value = false;
+}
 };
 
 const isStepComplete = (step: number) => step < stepIndex.value;
