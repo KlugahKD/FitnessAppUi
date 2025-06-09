@@ -221,7 +221,7 @@ definePageMeta({
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="YYYY/DD/MM"
+                      placeholder="YYYY-DD-MM"
                       v-bind="componentField"
                       v-model="formValues.dateOfBirth"
                     />
