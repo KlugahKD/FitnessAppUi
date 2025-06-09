@@ -13,12 +13,15 @@ definePageMeta({
 
 const router = useRouter();
 const loading = ref(false);
+const serverError = ref("");
 
 const form = useForm<LoginForm>({
   validationSchema: toTypedSchema(loginSchema),
 });
 
 const onSubmit = form.handleSubmit(async (values: LoginForm) => {
+    serverError.value = ""; // clear any previous error
+
   try {
     loading.value = true;
     const result = await login(values);
@@ -26,6 +29,10 @@ const onSubmit = form.handleSubmit(async (values: LoginForm) => {
     router.push("/dashboard");
   } catch (error) {
     console.error("Login failed", error);
+    const fallbackMessage =
+      "Server error. Please check your connection and try again.";
+    serverError.value = fallbackMessage;
+    loading.value = false;
   } finally {
     loading.value = false;
   }
@@ -49,6 +56,11 @@ const onSubmit = form.handleSubmit(async (values: LoginForm) => {
         </header>
 
         <form class="space-y-5" @submit.prevent="onSubmit">
+           <!-- Inline server error display -->
+          <p v-if="serverError" class="text-sm text-red-600 text-center -mt-2">
+            {{ serverError }}
+          </p>
+
           <FormField v-slot="{ componentField }" name="email">
             <FormItem>
               <FormLabel class="text-black">Email</FormLabel>
